@@ -1,0 +1,27 @@
+#!/bin/bash
+
+LOGFILE=/var/log/cyclenordvpn.log
+
+echo "Starting script at $(date)" >> $LOGFILE
+
+countries=("United_States" "Canada" "United_Kingdom" "Australia" "Germany")
+interval=600  # 10 minutes
+
+connect_to_country() {
+  country=$1
+  echo "Connecting to $country..." >> $LOGFILE
+  nordvpn connect $country >> $LOGFILE 2>&1
+  if [ $? -ne 0 ]; then
+    echo "Failed to connect to $country" >> $LOGFILE
+  else
+    echo "Successfully connected to $country" >> $LOGFILE
+  fi
+}
+
+while true; do
+  for country in "${countries[@]}"; do
+    connect_to_country $country
+    echo "Waiting for $interval seconds before switching to the next country..." >> $LOGFILE
+    sleep $interval
+  done
+done
